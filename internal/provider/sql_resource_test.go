@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"terraform-provider-oracle/internal/oracle"
+	"github.com/neozocloud/terraform-provider-oracle/internal/oracle"
 )
 
 func TestAccSqlResource(t *testing.T) {

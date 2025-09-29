@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -15,7 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 
-	"terraform-provider-oracle/internal/oracle"
+	"github.com/neozocloud/terraform-provider-oracle/internal/oracle"
 )
 
 // Ensure provider-defined types fully satisfy framework interfaces.
@@ -183,7 +184,7 @@ func (r *UserResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	data.Username = types.StringValue(user.Username)
+	data.Username = types.StringValue(strings.ToLower(user.Username))
 	data.DefaultTablespace = types.StringValue(user.DefaultTablespace)
 	data.DefaultTempTablespace = types.StringValue(user.DefaultTempTablespace)
 	data.Profile = types.StringValue(user.Profile)

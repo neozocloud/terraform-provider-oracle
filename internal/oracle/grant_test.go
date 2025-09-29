@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"terraform-provider-oracle/internal/oracle"
+	"github.com/neozocloud/terraform-provider-oracle/internal/oracle"
 )
 
 func TestGrant(t *testing.T) {

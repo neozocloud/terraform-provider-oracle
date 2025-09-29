@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 
-	"terraform-provider-oracle/internal/provider"
+	"github.com/neozocloud/terraform-provider-oracle/internal/provider"
 )
 
 var (

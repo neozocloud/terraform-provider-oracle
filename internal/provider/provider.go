@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 
-	"terraform-provider-oracle/internal/oracle"
+	"github.com/neozocloud/terraform-provider-oracle/internal/oracle"
 )
 
 // Ensure OracleRDBMSProvider satisfies various provider interfaces.
