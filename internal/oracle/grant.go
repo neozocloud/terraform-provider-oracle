@@ -111,10 +111,16 @@ func (c *Client) GrantObjectPrivileges(privilege ObjectPrivilege) error {
 
 	// Grant the desired privileges
 	if len(privilege.Privileges) > 0 {
-		privs := strings.Join(privilege.Privileges, ",")
-		grantSQL := fmt.Sprintf("GRANT %s ON %s TO %s", privs, privilege.Object, privilege.Principal)
-		_, err := c.DB.Exec(grantSQL)
-		return err
+		for _, priv := range privilege.Privileges {
+			grantSQL := fmt.Sprintf("GRANT %s ON %s TO %s", priv, privilege.Object, privilege.Principal)
+			if strings.Contains(strings.ToUpper(priv), "WITH GRANT OPTION") {
+				grantSQL = fmt.Sprintf("GRANT %s ON %s TO %s WITH GRANT OPTION", strings.Replace(priv, " WITH GRANT OPTION", "", 1), privilege.Object, privilege.Principal)
+			}
+			_, err := c.DB.Exec(grantSQL)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -155,10 +161,16 @@ func (c *Client) GrantDirectoryPrivileges(privilege DirectoryPrivilege) error {
 
 	// Grant the desired privileges
 	if len(privilege.Privileges) > 0 {
-		privs := strings.Join(privilege.Privileges, ",")
-		grantSQL := fmt.Sprintf("GRANT %s ON DIRECTORY %s TO %s", privs, privilege.Directory, privilege.Principal)
-		_, err := c.DB.Exec(grantSQL)
-		return err
+		for _, priv := range privilege.Privileges {
+			grantSQL := fmt.Sprintf("GRANT %s ON DIRECTORY %s TO %s", priv, privilege.Directory, privilege.Principal)
+			if strings.Contains(strings.ToUpper(priv), "WITH GRANT OPTION") {
+				grantSQL = fmt.Sprintf("GRANT %s ON DIRECTORY %s TO %s WITH GRANT OPTION", strings.Replace(priv, " WITH GRANT OPTION", "", 1), privilege.Directory, privilege.Principal)
+			}
+			_, err := c.DB.Exec(grantSQL)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -174,7 +186,7 @@ func (c *Client) GrantDirectoryPrivileges(privilege DirectoryPrivilege) error {
 //	A slice of strings containing the current system privileges, and an error if the check fails.
 func (c *Client) GetCurrentSystemPrivileges(principal string) ([]string, error) {
 	var privileges []string
-	sql := "SELECT privilege FROM dba_sys_privs WHERE grantee = UPPER(:1)"
+	sql := "SELECT privilege, admin_option FROM dba_sys_privs WHERE grantee = UPPER(:1)"
 	rows, err := c.DB.Query(sql, principal)
 	if err != nil {
 		return nil, err
@@ -183,10 +195,11 @@ func (c *Client) GetCurrentSystemPrivileges(principal string) ([]string, error) 
 
 	for rows.Next() {
 		var privilege string
-		if err := rows.Scan(&privilege); err != nil {
+		var adminOption string
+		if err := rows.Scan(&privilege, &adminOption); err != nil {
 			return nil, err
 		}
-		privileges = append(privileges, privilege)
+		privileges = append(privileges, grantOption(privilege, adminOption))
 	}
 	return privileges, nil
 }
@@ -203,7 +216,7 @@ func (c *Client) GetCurrentSystemPrivileges(principal string) ([]string, error) 
 //	A slice of strings containing the current object privileges, and an error if the check fails.
 func (c *Client) GetCurrentObjectPrivileges(principal, object string) ([]string, error) {
 	var privileges []string
-	sql := "SELECT privilege FROM dba_tab_privs WHERE grantee = UPPER(:1) AND table_name = UPPER(:2)"
+	sql := "SELECT privilege, grantable FROM dba_tab_privs WHERE grantee = UPPER(:1) AND table_name = UPPER(:2)"
 	rows, err := c.DB.Query(sql, principal, object)
 	if err != nil {
 		return nil, err
@@ -212,10 +225,11 @@ func (c *Client) GetCurrentObjectPrivileges(principal, object string) ([]string,
 
 	for rows.Next() {
 		var privilege string
-		if err := rows.Scan(&privilege); err != nil {
+		var grantable string
+		if err := rows.Scan(&privilege, &grantable); err != nil {
 			return nil, err
 		}
-		privileges = append(privileges, privilege)
+		privileges = append(privileges, grantOption(privilege, grantable))
 	}
 	return privileges, nil
 }
@@ -229,10 +243,10 @@ func (c *Client) GetCurrentObjectPrivileges(principal, object string) ([]string,
 //
 // Returns:
 //
-//	A slice of strings containing the current directory privileges, and an error if the check fails.
+//	A slice of strings containing the current directory privileges and an error if the check fails.
 func (c *Client) GetCurrentDirectoryPrivileges(principal, directory string) ([]string, error) {
 	var privileges []string
-	sql := "SELECT privilege FROM all_tab_privs WHERE grantee = UPPER(:1) AND table_name = UPPER(:2) AND type = 'DIRECTORY'"
+	sql := "SELECT privilege, grantable FROM all_tab_privs WHERE grantee = UPPER(:1) AND table_name = UPPER(:2) AND type = 'DIRECTORY'"
 	rows, err := c.DB.Query(sql, principal, directory)
 	if err != nil {
 		return nil, err
@@ -241,10 +255,18 @@ func (c *Client) GetCurrentDirectoryPrivileges(principal, directory string) ([]s
 
 	for rows.Next() {
 		var privilege string
-		if err := rows.Scan(&privilege); err != nil {
+		var grantable string
+		if err := rows.Scan(&privilege, &grantable); err != nil {
 			return nil, err
 		}
-		privileges = append(privileges, privilege)
+		privileges = append(privileges, grantOption(privilege, grantable))
 	}
 	return privileges, nil
+}
+
+func grantOption(privilege, option string) string {
+	if option == "YES" {
+		return fmt.Sprintf("%s WITH ADMIN OPTION", privilege)
+	}
+	return privilege
 }
