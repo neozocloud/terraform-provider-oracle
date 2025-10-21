@@ -167,7 +167,6 @@ func (r *GrantDirectoryPrivilegesResource) Read(ctx context.Context, req resourc
 func (r *GrantDirectoryPrivilegesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data GrantDirectoryPrivilegesResourceModel
 
-	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
