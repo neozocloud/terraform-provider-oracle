@@ -19,6 +19,7 @@ type Grant struct {
 type ObjectPrivilege struct {
 	Principal  string   // The user or role to whom the privileges should be granted.
 	Object     string   // The database object on which to grant the privileges.
+	Owner      string   // The owner of the database object.
 	Privileges []string // A list of object privileges to grant.
 	GrantsMode string   // The grants mode, either "enforce" or "append".
 }
@@ -85,8 +86,12 @@ func (c *Client) GrantSystemPrivileges(grant Grant) error {
 //
 //	An error if the grant operation fails.
 func (c *Client) GrantObjectPrivileges(privilege ObjectPrivilege) error {
+	object := fmt.Sprintf("%s.%s", privilege.Owner, privilege.Object)
+	if privilege.Owner == "" {
+		object = privilege.Object
+	}
 	if privilege.GrantsMode == "enforce" {
-		currentPrivs, err := c.GetCurrentObjectPrivileges(privilege.Principal, privilege.Object)
+		currentPrivs, err := c.GetCurrentObjectPrivileges(privilege.Principal, privilege.Owner, privilege.Object)
 		if err != nil {
 			return err
 		}
@@ -101,7 +106,7 @@ func (c *Client) GrantObjectPrivileges(privilege ObjectPrivilege) error {
 				}
 			}
 			if !found {
-				revokeSQL := fmt.Sprintf("REVOKE %s ON %s FROM %s", currentPriv, privilege.Object, privilege.Principal)
+				revokeSQL := fmt.Sprintf("REVOKE %s ON %s FROM %s", currentPriv, object, privilege.Principal)
 				if _, err := c.DB.Exec(revokeSQL); err != nil {
 					return err
 				}
@@ -112,9 +117,9 @@ func (c *Client) GrantObjectPrivileges(privilege ObjectPrivilege) error {
 	// Grant the desired privileges
 	if len(privilege.Privileges) > 0 {
 		for _, priv := range privilege.Privileges {
-			grantSQL := fmt.Sprintf("GRANT %s ON %s TO %s", priv, privilege.Object, privilege.Principal)
+			grantSQL := fmt.Sprintf("GRANT %s ON %s TO %s", priv, object, privilege.Principal)
 			if strings.Contains(strings.ToUpper(priv), "WITH GRANT OPTION") {
-				grantSQL = fmt.Sprintf("GRANT %s ON %s TO %s WITH GRANT OPTION", strings.Replace(priv, " WITH GRANT OPTION", "", 1), privilege.Object, privilege.Principal)
+				grantSQL = fmt.Sprintf("GRANT %s ON %s TO %s WITH GRANT OPTION", strings.Replace(priv, " WITH GRANT OPTION", "", 1), object, privilege.Principal)
 			}
 			_, err := c.DB.Exec(grantSQL)
 			if err != nil {
@@ -214,10 +219,16 @@ func (c *Client) GetCurrentSystemPrivileges(principal string) ([]string, error) 
 // Returns:
 //
 //	A slice of strings containing the current object privileges, and an error if the check fails.
-func (c *Client) GetCurrentObjectPrivileges(principal, object string) ([]string, error) {
+func (c *Client) GetCurrentObjectPrivileges(principal, owner, object string) ([]string, error) {
 	var privileges []string
-	sql := "SELECT privilege, grantable FROM dba_tab_privs WHERE grantee = UPPER(:1) AND table_name = UPPER(:2)"
-	rows, err := c.DB.Query(sql, principal, object)
+	sql := "SELECT privilege, grantable FROM dba_tab_privs WHERE grantee = UPPER(:1) AND owner = UPPER(:2) AND table_name = UPPER(:3)"
+	if owner == "" {
+		sql = "SELECT privilege, grantable FROM dba_tab_privs WHERE grantee = UPPER(:1) AND table_name = UPPER(:2)"
+	}
+	rows, err := c.DB.Query(sql, principal, owner, object)
+	if owner == "" {
+		rows, err = c.DB.Query(sql, principal, object)
+	}
 	if err != nil {
 		return nil, err
 	}

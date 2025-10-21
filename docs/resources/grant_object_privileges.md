@@ -23,6 +23,7 @@ Oracle Grant Object Privileges resource
 
 ### Optional
 
+- `owner` (String) Owner of the object
 - `grants_mode` (String) Grants mode
 
 ### Read-Only

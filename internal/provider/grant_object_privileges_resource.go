@@ -36,6 +36,7 @@ type GrantObjectPrivilegesResource struct {
 type GrantObjectPrivilegesResourceModel struct {
 	Principal  types.String `tfsdk:"principal"`
 	Object     types.String `tfsdk:"object"`
+	Owner      types.String `tfsdk:"owner"`
 	Privileges types.Set    `tfsdk:"privileges"`
 	GrantsMode types.String `tfsdk:"grants_mode"`
 	ID         types.String `tfsdk:"id"`
@@ -57,6 +58,10 @@ func (r *GrantObjectPrivilegesResource) Schema(ctx context.Context, req resource
 			"object": schema.StringAttribute{
 				MarkdownDescription: "Object",
 				Required:            true,
+			},
+			"owner": schema.StringAttribute{
+				MarkdownDescription: "Owner",
+				Optional:            true,
 			},
 			"privileges": schema.SetAttribute{
 				MarkdownDescription: "Privileges",
@@ -117,6 +122,7 @@ func (r *GrantObjectPrivilegesResource) Create(ctx context.Context, req resource
 	grant := oracle.ObjectPrivilege{
 		Principal:  data.Principal.ValueString(),
 		Object:     data.Object.ValueString(),
+		Owner:      data.Owner.ValueString(),
 		Privileges: privileges,
 		GrantsMode: data.GrantsMode.ValueString(),
 	}
@@ -127,7 +133,7 @@ func (r *GrantObjectPrivilegesResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	data.ID = types.StringValue(fmt.Sprintf("%s:%s", data.Principal.ValueString(), data.Object.ValueString()))
+	data.ID = types.StringValue(fmt.Sprintf("%s:%s:%s", data.Principal.ValueString(), data.Owner.ValueString(), data.Object.ValueString()))
 
 	tflog.Trace(ctx, "granted object privileges")
 
@@ -145,9 +151,10 @@ func (r *GrantObjectPrivilegesResource) Read(ctx context.Context, req resource.R
 
 	parts := strings.Split(data.ID.ValueString(), ":")
 	principal := parts[0]
-	object := parts[1]
+	owner := parts[1]
+	object := parts[2]
 
-	privileges, err := r.client.GetCurrentObjectPrivileges(principal, object)
+	privileges, err := r.client.GetCurrentObjectPrivileges(principal, owner, object)
 	if err != nil {
 		// If the grant is not found, remove it from state
 		resp.State.RemoveResource(ctx)
@@ -155,6 +162,7 @@ func (r *GrantObjectPrivilegesResource) Read(ctx context.Context, req resource.R
 	}
 
 	data.Principal = types.StringValue(principal)
+	data.Owner = types.StringValue(owner)
 	data.Object = types.StringValue(object)
 	data.Privileges, resp.Diagnostics = types.SetValueFrom(ctx, types.StringType, privileges)
 	if resp.Diagnostics.HasError() {
@@ -183,6 +191,7 @@ func (r *GrantObjectPrivilegesResource) Update(ctx context.Context, req resource
 	grant := oracle.ObjectPrivilege{
 		Principal:  data.Principal.ValueString(),
 		Object:     data.Object.ValueString(),
+		Owner:      data.Owner.ValueString(),
 		Privileges: privileges,
 		GrantsMode: data.GrantsMode.ValueString(),
 	}
@@ -208,6 +217,7 @@ func (r *GrantObjectPrivilegesResource) Delete(ctx context.Context, req resource
 	grant := oracle.ObjectPrivilege{
 		Principal:  data.Principal.ValueString(),
 		Object:     data.Object.ValueString(),
+		Owner:      data.Owner.ValueString(),
 		Privileges: []string{},
 		GrantsMode: "enforce",
 	}
