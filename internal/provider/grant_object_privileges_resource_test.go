@@ -14,7 +14,8 @@ import (
 func TestAcc_GrantObjectPrivilegesResource(t *testing.T) {
 	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	tableName := "test_table_" + randString
-	setupTestTable(t, tableName)
+	ownerName := "test_owner_" + randString
+	setupTestTableForOwner(t, tableName, ownerName)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -31,12 +32,14 @@ resource "oracle_user" "test_user" {
 
 resource "oracle_grant_object_privileges" "test_grant" {
   principal  = oracle_user.test_user.username
+  owner      = "%s"
   object     = "%s"
   privileges = toset(["SELECT"])
 }
-`, randString, tableName),
+`, randString, ownerName, tableName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("oracle_grant_object_privileges.test_grant", "principal", fmt.Sprintf("testuser_%s", randString)),
+					resource.TestCheckResourceAttr("oracle_grant_object_privileges.test_grant", "owner", ownerName),
 					resource.TestCheckResourceAttr("oracle_grant_object_privileges.test_grant", "object", tableName),
 					resource.TestCheckResourceAttr("oracle_grant_object_privileges.test_grant", "privileges.#", "1"),
 					resource.TestCheckResourceAttr("oracle_grant_object_privileges.test_grant", "privileges.0", "SELECT"),
@@ -58,10 +61,11 @@ resource "oracle_user" "test_user" {
 
 resource "oracle_grant_object_privileges" "test_grant" {
   principal  = oracle_user.test_user.username
+  owner      = "%s"
   object     = "%s"
   privileges = toset(["SELECT", "UPDATE"])
 }
-`, randString, tableName),
+`, randString, ownerName, tableName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("oracle_grant_object_privileges.test_grant", "privileges.#", "2"),
 					resource.TestCheckResourceAttr("oracle_grant_object_privileges.test_grant", "privileges.0", "SELECT"),
@@ -72,6 +76,6 @@ resource "oracle_grant_object_privileges" "test_grant" {
 		},
 	})
 	t.Cleanup(func() {
-		tearDownTestTable(t, tableName)
+		tearDownTestTableForOwner(t, tableName, ownerName)
 	})
 }
