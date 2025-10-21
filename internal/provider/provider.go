@@ -237,6 +237,7 @@ func (p *OracleRDBMSProvider) Resources(ctx context.Context) []func() resource.R
 		NewGrantSystemPrivilegesResource,
 		NewGrantObjectPrivilegesResource,
 		NewGrantDirectoryPrivilegesResource,
+		NewGrantRolesResource,
 		NewDirectoryResource,
 		NewSqlResource,
 	}

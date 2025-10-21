@@ -32,7 +32,6 @@ func TestUser(t *testing.T) {
 	}
 	defer client.DB.Close()
 
-	// Create a user for testing
 	testUser := oracle.User{
 		Username:           "testuser",
 		Password:           "testpassword",
@@ -47,13 +46,11 @@ func TestUser(t *testing.T) {
 
 	assert.NoError(t, client.CreateUser(testUser))
 
-	// Modify the user
 	modifiedUser := oracle.User{
 		Username: testUser.Username,
 		Password: "newpassword",
 	}
 	assert.NoError(t, client.ModifyUser(modifiedUser))
 
-	// Drop the user
 	assert.NoError(t, client.DropUser(testUser.Username))
 }

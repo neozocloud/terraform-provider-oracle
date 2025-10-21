@@ -32,7 +32,6 @@ func TestRole(t *testing.T) {
 	}
 	defer client.DB.Close()
 
-	// Create a role for testing
 	testRole := oracle.Role{
 		Name: "testrole",
 	}
@@ -45,6 +44,5 @@ func TestRole(t *testing.T) {
 
 	assert.NoError(t, client.CreateRole(testRole))
 
-	// Drop the role
 	assert.NoError(t, client.DropRole(testRole.Name))
 }
