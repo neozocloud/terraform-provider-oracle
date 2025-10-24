@@ -17,8 +17,8 @@ Oracle Role resource
 
 ### Required
 
-- `name` (String) Role name
+- `name` (String) name of the role. Must be unique.
 
 ### Read-Only
 
-- `id` (String) Role identifier
+- `id` (String) role identifier (name in lowercase).

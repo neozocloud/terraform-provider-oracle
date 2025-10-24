@@ -47,24 +47,24 @@ func (r *GrantDirectoryPrivilegesResource) Metadata(ctx context.Context, req res
 
 func (r *GrantDirectoryPrivilegesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Oracle Grant Directory Privileges resource",
+		MarkdownDescription: "A resource to manage directory privileges for a user or role.",
 
 		Attributes: map[string]schema.Attribute{
 			"principal": schema.StringAttribute{
-				MarkdownDescription: "Principal",
+				MarkdownDescription: "The user or role to whom the privileges are granted.",
 				Required:            true,
 			},
 			"directory": schema.StringAttribute{
-				MarkdownDescription: "Directory",
+				MarkdownDescription: "The name of the directory object.",
 				Required:            true,
 			},
 			"privileges": schema.SetAttribute{
-				MarkdownDescription: "Privileges",
+				MarkdownDescription: "The privileges to grant on the directory. Possible values are `READ` and `WRITE`.",
 				ElementType:         types.StringType,
 				Required:            true,
 			},
 			"grants_mode": schema.StringAttribute{
-				MarkdownDescription: "Grants mode",
+				MarkdownDescription: "The grants mode to use. If not specified, the default is `append`.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{

@@ -48,28 +48,28 @@ func (r *GrantObjectPrivilegesResource) Metadata(ctx context.Context, req resour
 
 func (r *GrantObjectPrivilegesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Oracle Grant Object Privileges resource",
+		MarkdownDescription: "A resource to manage object privileges for a user",
 
 		Attributes: map[string]schema.Attribute{
 			"principal": schema.StringAttribute{
-				MarkdownDescription: "Principal",
+				MarkdownDescription: "The user or role to whom the privileges are granted.",
 				Required:            true,
 			},
 			"object": schema.StringAttribute{
-				MarkdownDescription: "Object",
+				MarkdownDescription: "The name of the object.",
 				Required:            true,
 			},
 			"owner": schema.StringAttribute{
-				MarkdownDescription: "Owner",
+				MarkdownDescription: "The owner of the object.",
 				Optional:            true,
 			},
 			"privileges": schema.SetAttribute{
-				MarkdownDescription: "Privileges",
+				MarkdownDescription: "The privileges to grant on the object.",
 				ElementType:         types.StringType,
 				Required:            true,
 			},
 			"grants_mode": schema.StringAttribute{
-				MarkdownDescription: "Grants mode",
+				MarkdownDescription: "The grants mode to use. If not specified, the default is `append`.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{

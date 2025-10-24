@@ -3,12 +3,12 @@
 page_title: "oracle_directory Resource - terraform-provider-oracle"
 subcategory: ""
 description: |-
-  Oracle Directory resource
+  A directory object represents a directory on the database server file system.
 ---
 
 # oracle_directory (Resource)
 
-Oracle Directory resource
+A directory object represents a directory on the database server file system.
 
 
 
@@ -17,8 +17,8 @@ Oracle Directory resource
 
 ### Required
 
-- `name` (String) Directory name
-- `path` (String) Directory path
+- `name` (String) The name of the directory object.
+- `path` (String) The path to the directory on the database server file system.
 
 ### Read-Only
 

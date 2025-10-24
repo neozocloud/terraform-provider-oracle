@@ -45,20 +45,20 @@ func (r *GrantSystemPrivilegesResource) Metadata(ctx context.Context, req resour
 
 func (r *GrantSystemPrivilegesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Oracle Grant System Privileges resource",
+		MarkdownDescription: "A resource to manage system privileges for a user or role.",
 
 		Attributes: map[string]schema.Attribute{
 			"principal": schema.StringAttribute{
-				MarkdownDescription: "Principal",
+				MarkdownDescription: "The user or role to whom the privileges are granted.",
 				Required:            true,
 			},
 			"privileges": schema.SetAttribute{
-				MarkdownDescription: "Privileges",
+				MarkdownDescription: "The system privileges to grant to the principal. (This should be specified in uppercase. for example: `CREATE SESSION`)",
 				ElementType:         types.StringType,
 				Required:            true,
 			},
 			"grants_mode": schema.StringAttribute{
-				MarkdownDescription: "Grants mode",
+				MarkdownDescription: "The grants mode to use. If not specified, the default is `append`.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{

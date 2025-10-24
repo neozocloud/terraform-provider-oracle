@@ -45,20 +45,20 @@ func (r *GrantRolesResource) Metadata(ctx context.Context, req resource.Metadata
 
 func (r *GrantRolesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Oracle Grant Roles resource",
+		MarkdownDescription: "A resource to manage roles for a user or role.",
 
 		Attributes: map[string]schema.Attribute{
 			"principal": schema.StringAttribute{
-				MarkdownDescription: "Principal",
+				MarkdownDescription: "The user or role to whom the roles are granted.",
 				Required:            true,
 			},
 			"roles": schema.SetAttribute{
-				MarkdownDescription: "Roles",
+				MarkdownDescription: "The roles to grant to the principal. (This should be specified in lowercase. for example: `connect`, `resource`)",
 				ElementType:         types.StringType,
 				Required:            true,
 			},
 			"grants_mode": schema.StringAttribute{
-				MarkdownDescription: "Grants mode",
+				MarkdownDescription: "The grants mode to use. If not specified, the default is `append`.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{

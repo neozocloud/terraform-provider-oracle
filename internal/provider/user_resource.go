@@ -50,40 +50,40 @@ func (r *UserResource) Metadata(ctx context.Context, req resource.MetadataReques
 
 func (r *UserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Oracle User resource",
+		MarkdownDescription: "Manages an Oracle Database user. This resource allows for the creation, modification, and deletion of database users, including their authentication details, tablespace assignments, and profile settings.",
 
 		Attributes: map[string]schema.Attribute{
 			"username": schema.StringAttribute{
-				MarkdownDescription: "Username",
+				MarkdownDescription: "The name of the user to create.(This should be specified in lowercase. For example: `test_user`).",
 				Required:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Password",
+				MarkdownDescription: "The password for the user. This is a sensitive attribute.",
 				Optional:            true,
 				Sensitive:           true,
 			},
 			"default_tablespace": schema.StringAttribute{
-				MarkdownDescription: "Default tablespace",
+				MarkdownDescription: "The default tablespace for the user.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"default_temp_tablespace": schema.StringAttribute{
-				MarkdownDescription: "Default temporary tablespace",
+				MarkdownDescription: "The default temporary tablespace for the user.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"profile": schema.StringAttribute{
-				MarkdownDescription: "Profile",
+				MarkdownDescription: "The profile assigned to the user.",
 				Optional:            true,
 				Computed:            true,
 			},
 			"authentication_type": schema.StringAttribute{
-				MarkdownDescription: "Authentication type",
+				MarkdownDescription: "The authentication method for the user (e.g., `PASSWORD`, `EXTERNAL`, `GLOBAL`).",
 				Optional:            true,
 				Computed:            true,
 			},
 			"state": schema.StringAttribute{
-				MarkdownDescription: "Account state",
+				MarkdownDescription: "The account state of the user (e.g., `OPEN`, `LOCKED`, `EXPIRED`).",
 				Optional:            true,
 				Computed:            true,
 			},
