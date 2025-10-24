@@ -3,12 +3,12 @@
 page_title: "oracle_grant_system_privileges Resource - terraform-provider-oracle"
 subcategory: ""
 description: |-
-  Oracle Grant System Privileges resource
+  A resource to manage system privileges for a user or role.
 ---
 
 # oracle_grant_system_privileges (Resource)
 
-Oracle Grant System Privileges resource
+A resource to manage system privileges for a user or role.
 
 
 
@@ -17,13 +17,26 @@ Oracle Grant System Privileges resource
 
 ### Required
 
-- `principal` (String) Principal
-- `privileges` (Set of String) Privileges
+- `principal` (String) The user or role to whom the privileges are granted.
+- `privileges` (Set of String) The system privileges to grant to the principal. (This should be specified in uppercase. for example: `CREATE SESSION`)
 
 ### Optional
 
-- `grants_mode` (String) Grants mode
+- `grants_mode` (String) The grants mode to use. If not specified, the default is `append`.
 
 ### Read-Only
 
 - `id` (String) Grant identifier
+
+### Example Usage
+```hcl
+resource "oracle_grant_system_privileges" "test_grant" {
+  principal  = "testuser"
+  privileges = toset(["CREATE SESSION"])
+}
+```
+### Import
+
+```shell
+terraform import oracle_grant_system_privileges.test_grant testuser
+```

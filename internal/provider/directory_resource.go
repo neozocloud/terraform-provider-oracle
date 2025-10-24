@@ -45,15 +45,15 @@ func (r *DirectoryResource) Metadata(ctx context.Context, req resource.MetadataR
 
 func (r *DirectoryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Oracle Directory resource",
+		MarkdownDescription: "A directory object represents a directory on the database server file system.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Directory name",
+				MarkdownDescription: "The name of the directory object.",
 				Required:            true,
 			},
 			"path": schema.StringAttribute{
-				MarkdownDescription: "Directory path",
+				MarkdownDescription: "The path to the directory on the database server file system.",
 				Required:            true,
 			},
 			"id": schema.StringAttribute{

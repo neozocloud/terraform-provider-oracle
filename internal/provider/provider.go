@@ -49,22 +49,28 @@ func (p *OracleRDBMSProvider) Metadata(ctx context.Context, req provider.Metadat
 
 func (p *OracleRDBMSProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		MarkdownDescription: "Oracle RDBMS provider to manage users, roles, and privileges.",
 		Attributes: map[string]schema.Attribute{
 			"host": schema.StringAttribute{
-				Optional: true,
+				MarkdownDescription: "host name or IP address of the Oracle database server.",
+				Optional:            true,
 			},
 			"port": schema.StringAttribute{
-				Optional: true,
+				MarkdownDescription: "port number of the Oracle database server.",
+				Optional:            true,
 			},
 			"username": schema.StringAttribute{
-				Optional: true,
+				MarkdownDescription: "username to connect to the Oracle database server.",
+				Optional:            true,
 			},
 			"password": schema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
+				MarkdownDescription: "password to connect to the Oracle database server.",
+				Optional:            true,
+				Sensitive:           true,
 			},
 			"service": schema.StringAttribute{
-				Optional: true,
+				MarkdownDescription: "service name of the Oracle database server.",
+				Optional:            true,
 			},
 		},
 	}

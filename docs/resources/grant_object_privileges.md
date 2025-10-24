@@ -3,12 +3,12 @@
 page_title: "oracle_grant_object_privileges Resource - terraform-provider-oracle"
 subcategory: ""
 description: |-
-  Oracle Grant Object Privileges resource
+  A resource to manage object privileges for a user
 ---
 
 # oracle_grant_object_privileges (Resource)
 
-Oracle Grant Object Privileges resource
+A resource to manage object privileges for a user
 
 
 
@@ -17,15 +17,31 @@ Oracle Grant Object Privileges resource
 
 ### Required
 
-- `object` (String) Object
-- `principal` (String) Principal
-- `privileges` (Set of String) Privileges
+- `object` (String) The name of the object.
+- `principal` (String) The user or role to whom the privileges are granted.
+- `privileges` (Set of String) The privileges to grant on the object.
 
 ### Optional
 
-- `owner` (String) Owner of the object
-- `grants_mode` (String) Grants mode
+- `grants_mode` (String) The grants mode to use. If not specified, the default is `append`.
+- `owner` (String) The owner of the object.
 
 ### Read-Only
 
 - `id` (String) Grant identifier
+
+### Example
+
+```hcl
+resource "oracle_grant_object_privileges" "test_grant" {
+  principal  = "testuser"
+  object     = "test_table"
+  owner      = "test"
+  privileges = toset(["SELECT"])
+}
+```
+
+### Import
+```shell
+terraform import oracle_grant_object_privileges.test_grant user:owner:object
+```

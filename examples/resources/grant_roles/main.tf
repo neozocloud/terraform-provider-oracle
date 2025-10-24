@@ -15,7 +15,7 @@ provider "oracle" {
 }
 
 resource "oracle_grant_roles" "test_grant" {
-  principal  = "testuser"
-  roles = toset([ "connect", "resource" ])
+  principal   = "testuser"
+  roles       = toset(["connect", "resource"])
   grants_mode = "enforce"
 }

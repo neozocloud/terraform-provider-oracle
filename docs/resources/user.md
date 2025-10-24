@@ -3,12 +3,12 @@
 page_title: "oracle_user Resource - terraform-provider-oracle"
 subcategory: ""
 description: |-
-  Oracle User resource
+  Manages an Oracle Database user. This resource allows for the creation, modification, and deletion of database users, including their authentication details, tablespace assignments, and profile settings.
 ---
 
 # oracle_user (Resource)
 
-Oracle User resource
+Manages an Oracle Database user. This resource allows for the creation, modification, and deletion of database users, including their authentication details, tablespace assignments, and profile settings.
 
 
 
@@ -17,17 +17,30 @@ Oracle User resource
 
 ### Required
 
-- `username` (String) Username
+- `username` (String) The name of the user to create.(This should be specified in lowercase. For example: `test_user`).
 
 ### Optional
 
-- `authentication_type` (String) Authentication type
-- `default_tablespace` (String) Default tablespace
-- `default_temp_tablespace` (String) Default temporary tablespace
-- `password` (String, Sensitive) Password
-- `profile` (String) Profile
-- `state` (String) Account state
+- `authentication_type` (String) The authentication method for the user (e.g., `PASSWORD`, `EXTERNAL`, `GLOBAL`).
+- `default_tablespace` (String) The default tablespace for the user.
+- `default_temp_tablespace` (String) The default temporary tablespace for the user.
+- `password` (String, Sensitive) The password for the user. This is a sensitive attribute.
+- `profile` (String) The profile assigned to the user.
+- `state` (String) The account state of the user (e.g., `OPEN`, `LOCKED`, `EXPIRED`).
 
 ### Read-Only
 
 - `id` (String) User identifier
+
+### Examples
+```hcl
+resource "oracle_user" "test_user" {
+  username = "testuser"
+  password = "password"
+}
+```
+
+### Import
+```shell
+terraform import oracle_user.test_user testuser
+```

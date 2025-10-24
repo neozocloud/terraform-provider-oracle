@@ -9,5 +9,6 @@ terraform {
 resource "oracle_grant_object_privileges" "test_grant" {
   principal  = "testuser"
   object     = "test_table"
+  owner      = "test"
   privileges = toset(["SELECT"])
 }

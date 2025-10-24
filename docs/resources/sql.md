@@ -3,12 +3,12 @@
 page_title: "oracle_sql Resource - terraform-provider-oracle"
 subcategory: ""
 description: |-
-  Oracle SQL resource
+  This resource allows for the execution of arbitrary SQL statements against an Oracle database. It is a 'write-only' resource, meaning it only performs the SQL execution during creation and does not manage the state of the executed SQL. It is recommended to use create_before_destroy = true in the lifecycle block to ensure that a new SQL statement is executed before an old one is 'deleted' (which is a no-op).
 ---
 
 # oracle_sql (Resource)
 
-Oracle SQL resource
+This resource allows for the execution of arbitrary SQL statements against an Oracle database. It is a 'write-only' resource, meaning it only performs the SQL execution during creation and does not manage the state of the executed SQL. It is recommended to use `create_before_destroy = true` in the lifecycle block to ensure that a new SQL statement is executed before an old one is 'deleted' (which is a no-op).
 
 
 
@@ -17,8 +17,8 @@ Oracle SQL resource
 
 ### Required
 
-- `sql` (String) SQL to execute
+- `sql` (String) The SQL statement to be executed.
 
 ### Read-Only
 
-- `id` (String) SQL identifier
+- `id` (String) The identifier for the SQL resource, derived from the SQL statement itself.

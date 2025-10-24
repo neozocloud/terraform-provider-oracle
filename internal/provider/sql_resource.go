@@ -39,16 +39,16 @@ func (r *SqlResource) Metadata(ctx context.Context, req resource.MetadataRequest
 
 func (r *SqlResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Oracle SQL resource",
+		MarkdownDescription: "This resource allows for the execution of arbitrary SQL statements against an Oracle database. It is a 'write-only' resource, meaning it only performs the SQL execution during creation and does not manage the state of the executed SQL. It is recommended to use `create_before_destroy = true` in the lifecycle block to ensure that a new SQL statement is executed before an old one is 'deleted' (which is a no-op).",
 
 		Attributes: map[string]schema.Attribute{
 			"sql": schema.StringAttribute{
-				MarkdownDescription: "SQL to execute",
+				MarkdownDescription: "The SQL statement to be executed.",
 				Required:            true,
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "SQL identifier",
+				MarkdownDescription: "The identifier for the SQL resource, derived from the SQL statement itself.",
 			},
 		},
 	}

@@ -48,15 +48,12 @@ func (r *RoleResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Role name",
+				MarkdownDescription: "name of the role. Must be unique.",
 				Required:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Role identifier",
+				MarkdownDescription: "role identifier (name in lowercase).",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

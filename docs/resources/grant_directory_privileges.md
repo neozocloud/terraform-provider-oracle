@@ -3,12 +3,12 @@
 page_title: "oracle_grant_directory_privileges Resource - terraform-provider-oracle"
 subcategory: ""
 description: |-
-  Oracle Grant Directory Privileges resource
+  A resource to manage directory privileges for a user or role.
 ---
 
 # oracle_grant_directory_privileges (Resource)
 
-Oracle Grant Directory Privileges resource
+A resource to manage directory privileges for a user or role.
 
 
 
@@ -17,13 +17,13 @@ Oracle Grant Directory Privileges resource
 
 ### Required
 
-- `directory` (String) Directory
-- `principal` (String) Principal
-- `privileges` (Set of String) Privileges
+- `directory` (String) The name of the directory object.
+- `principal` (String) The user or role to whom the privileges are granted.
+- `privileges` (Set of String) The privileges to grant on the directory. Possible values are `READ` and `WRITE`.
 
 ### Optional
 
-- `grants_mode` (String) Grants mode
+- `grants_mode` (String) The grants mode to use. If not specified, the default is `append`.
 
 ### Read-Only
 
