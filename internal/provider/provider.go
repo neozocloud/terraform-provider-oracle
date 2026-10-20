@@ -5,9 +5,11 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/function"
@@ -15,8 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/neozocloud/terraform-provider-oracle/internal/oracle"
 )
 
@@ -40,6 +42,20 @@ type OracleRDBMSProviderModel struct {
 	Password types.String `tfsdk:"password"`
 	Port     types.String `tfsdk:"port"`
 	Service  types.String `tfsdk:"service"`
+	Nne      types.String `tfsdk:"nne"`
+}
+
+const (
+	nneEnabled  = "enabled"
+	nneDisabled = "disabled"
+	defaultPort = 1521
+)
+
+func resolveString(configured types.String, envVar string) string {
+	if !configured.IsNull() {
+		return configured.ValueString()
+	}
+	return os.Getenv(envVar)
 }
 
 func (p *OracleRDBMSProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -56,8 +72,16 @@ func (p *OracleRDBMSProvider) Schema(ctx context.Context, req provider.SchemaReq
 				Optional:            true,
 			},
 			"port": schema.StringAttribute{
-				MarkdownDescription: "port number of the Oracle database server.",
-				Optional:            true,
+				Description: fmt.Sprintf("Listener port. Defaults to %d.", defaultPort),
+				Optional:    true,
+			},
+			"nne": schema.StringAttribute{
+				MarkdownDescription: "Oracle Native Network Encryption. Must be \"enabled\" or \"disabled\" " +
+					"(default). When \"enabled\", the provider fails if the session is not encrypted.",
+				Optional: true,
+				Validators: []validator.String{
+					stringvalidator.OneOf(nneEnabled, nneDisabled),
+				},
 			},
 			"username": schema.StringAttribute{
 				MarkdownDescription: "username to connect to the Oracle database server.",
@@ -121,6 +145,15 @@ func (p *OracleRDBMSProvider) Configure(ctx context.Context, req provider.Config
 		)
 	}
 
+	if config.Nne.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("nne"),
+			"Unknown Oracle Nne",
+			"The provider cannot create the Oracle client as there is an unknown configuration value for the Oracle NNE (NativeNetworkEncryption). "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the ORACLE_NNE environment variable.",
+		)
+	}
+
 	if config.Service.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("service"),
@@ -134,77 +167,59 @@ func (p *OracleRDBMSProvider) Configure(ctx context.Context, req provider.Config
 		return
 	}
 
-	host := os.Getenv("ORACLE_HOST")
-	port := os.Getenv("ORACLE_PORT")
-	username := os.Getenv("ORACLE_USERNAME")
-	password := os.Getenv("ORACLE_PASSWORD")
-	service := os.Getenv("ORACLE_SERVICE")
-	if !config.Host.IsNull() {
-		host = config.Host.ValueString()
+	// Config values override environment variables.
+	host := resolveString(config.Host, "ORACLE_HOST")
+	username := resolveString(config.Username, "ORACLE_USERNAME")
+	password := resolveString(config.Password, "ORACLE_PASSWORD")
+	service := resolveString(config.Service, "ORACLE_SERVICE")
+	portStr := resolveString(config.Port, "ORACLE_PORT")
+	nne := resolveString(config.Nne, "ORACLE_NNE")
+
+	// Required values must come from either the config or the environment.
+	required := []struct {
+		attr, envVar, value string
+	}{
+		{"host", "ORACLE_HOST", host},
+		{"username", "ORACLE_USERNAME", username},
+		{"password", "ORACLE_PASSWORD", password},
+		{"service", "ORACLE_SERVICE", service},
+	}
+	for _, r := range required {
+		if r.value == "" {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(r.attr),
+				"Missing Oracle provider configuration",
+				fmt.Sprintf("Set %q in the provider block or via the %s environment variable.", r.attr, r.envVar),
+			)
+		}
 	}
 
-	if !config.Port.IsNull() {
-		port = config.Port.ValueString()
+	// Port: optional, defaults to 1521.
+	port := defaultPort
+	if portStr != "" {
+		parsed, err := strconv.Atoi(portStr)
+		if err != nil || parsed < 1 || parsed > 65535 {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("port"),
+				"Invalid port",
+				fmt.Sprintf("%q is not a valid TCP port (1-65535).", portStr),
+			)
+		} else {
+			port = parsed
+		}
 	}
 
-	if !config.Username.IsNull() {
-		username = config.Username.ValueString()
-	}
-
-	if !config.Password.IsNull() {
-		password = config.Password.ValueString()
-	}
-
-	if !config.Service.IsNull() {
-		service = config.Service.ValueString()
-	}
-	if host == "" {
+	// NNE: optional, defaults to disabled. The schema validator only covers
+	// the provider block, so values from the environment are checked here.
+	switch nne {
+	case "":
+		nne = nneDisabled
+	case nneEnabled, nneDisabled:
+	default:
 		resp.Diagnostics.AddAttributeError(
-			path.Root("host"),
-			"Missing Oracle Host",
-			"The provider cannot create the Oracle client as there is a missing or empty value for the Oracle host. "+
-				"Set the host value in the configuration or use the ORACLE_HOST environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if username == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
-			"Missing Oracle Username",
-			"The provider cannot create the Oracle client as there is a missing or empty value for the Oracle username. "+
-				"Set the username value in the configuration or use the ORACLE_USERNAME environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if password == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("password"),
-			"Missing Oracle Password",
-			"The provider cannot create the Oracle client as there is a missing or empty value for the Oracle password. "+
-				"Set the password value in the configuration or use the ORACLE_PASSWORD environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if port == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("port"),
-			"Missing Oracle Port",
-			"The provider cannot create the Oracle client as there is a missing or empty value for the Oracle port. "+
-				"Set the port value in the configuration or use the ORACLE_PORT environment variable. "+
-				"If either is already set, ensure the value is not empty.",
-		)
-	}
-
-	if service == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("service"),
-			"Missing Oracle Service",
-			"The provider cannot create the Oracle client as there is a missing or empty value for the Oracle service. "+
-				"Set the service value in the configuration or use the ORACLE_SERVICE environment variable. "+
-				"If either is already set, ensure the value is not empty.",
+			path.Root("nne"),
+			"Invalid nne value",
+			fmt.Sprintf("%q is not valid; must be %q or %q.", nne, nneEnabled, nneDisabled),
 		)
 	}
 
@@ -212,16 +227,7 @@ func (p *OracleRDBMSProvider) Configure(ctx context.Context, req provider.Config
 		return
 	}
 
-	dbPort, err := strconv.Atoi(port)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Invalid Port Value",
-			"The provided port value is not a valid integer.",
-		)
-		return
-	}
-
-	client, err := oracle.NewClient(host, service, username, password, dbPort)
+	client, err := oracle.NewClient(host, service, username, password, port, nne == nneEnabled)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to Create Oracle Client",

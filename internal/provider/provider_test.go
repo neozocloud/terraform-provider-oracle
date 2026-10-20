@@ -39,6 +39,9 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ORACLE_PORT"); v == "" {
 		t.Fatal("ORACLE_PORT must be set for acceptance tests")
 	}
+	if v := os.Getenv("ORACLE_NNE"); v == "" {
+		t.Fatal("ORACLE_NNE must be set for acceptance tests")
+	}
 	if v := os.Getenv("ORACLE_USERNAME"); v == "" {
 		t.Fatal("ORACLE_USERNAME must be set for acceptance tests")
 	}
