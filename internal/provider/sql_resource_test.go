@@ -58,7 +58,7 @@ resource "oracle_sql" "test" {
 		if err != nil {
 			t.Fatalf("failed to convert port to integer: %s", err)
 		}
-		client, err := oracle.NewClient(dbHost, dbServiceName, dbUser, dbPassword, dbPort)
+		client, err := oracle.NewClient(dbHost, dbServiceName, dbUser, dbPassword, dbPort, false)
 		if err != nil {
 			t.Fatalf("Failed to create client: %s", err)
 		}

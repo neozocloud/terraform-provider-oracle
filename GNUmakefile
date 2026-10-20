@@ -16,9 +16,9 @@ fmt:
 	gofmt -s -w -e .
 
 test:
-	TF_ACC=true ORACLE_HOST=localhost ORACLE_PORT=1521 ORACLE_USERNAME=system ORACLE_PASSWORD=MyPassword123 ORACLE_SERVICE=orclpdb1  go test -v ./... -count=1
+	TF_ACC=true ORACLE_HOST=localhost ORACLE_PORT=1521 ORACLE_NNE=enabled ORACLE_USERNAME=system ORACLE_PASSWORD=MyPassword123 ORACLE_SERVICE=orclpdb1  go test -v ./... -count=1
 
 testacc:
-	ORACLE_HOST=localhost ORACLE_PORT=1521 ORACLE_USERNAME=system ORACLE_PASSWORD=MyPassword123 ORACLE_SERVICE=orclpdb1 TF_ACC=1 go test -v -cover -timeout 120m ./...
+	ORACLE_HOST=localhost ORACLE_PORT=1521 ORACLE_NNE=enabled ORACLE_USERNAME=system ORACLE_PASSWORD=MyPassword123 ORACLE_SERVICE=orclpdb1 TF_ACC=1 go test -v -cover -timeout 120m ./...
 
 .PHONY: fmt lint test testacc build install generate
