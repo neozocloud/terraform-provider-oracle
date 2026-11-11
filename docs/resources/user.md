@@ -21,7 +21,7 @@ Manages an Oracle Database user. This resource allows for the creation, modifica
 
 ### Optional
 
-- `authentication_type` (String) The authentication method for the user (e.g., `PASSWORD`, `EXTERNAL`, `GLOBAL`).
+- `authentication_type` (String) The authentication method for the user (e.g., `PASSWORD`, `EXTERNAL`, `GLOBAL`, `NOAUTH`).
 - `default_tablespace` (String) The default tablespace for the user.
 - `default_temp_tablespace` (String) The default temporary tablespace for the user.
 - `password` (String, Sensitive) The password for the user. This is a sensitive attribute.
