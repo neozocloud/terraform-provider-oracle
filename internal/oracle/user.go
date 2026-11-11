@@ -5,6 +5,7 @@ package oracle
 
 import (
 	"fmt"
+    "strings"
 )
 
 // User represents an Oracle database user.
@@ -135,6 +136,15 @@ func (c *Client) UserExists(username string) (bool, error) {
 	return count > 0, nil
 }
 
+func authTypeFromDB(v string) string {
+    switch strings.ToUpper(v) {
+    case "NONE":
+        return "noauth"
+    default:
+        return strings.ToLower(v) // PASSWORD -> password, EXTERNAL -> external, ...
+    }
+}
+
 // ReadUser reads a user's details from the database.
 //
 // Parameters:
@@ -151,5 +161,6 @@ func (c *Client) ReadUser(username string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+	user.AuthenticationType = authTypeFromDB(user.AuthenticationType)
 	return user, nil
 }
