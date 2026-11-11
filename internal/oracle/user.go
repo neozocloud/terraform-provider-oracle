@@ -15,7 +15,7 @@ type User struct {
 	DefaultTablespace     string // The default tablespace for the user.
 	DefaultTempTablespace string // The default temporary tablespace for the user.
 	Profile               string // The user's profile.
-	AuthenticationType    string // The authentication type, e.g., "password", "external", "global".
+	AuthenticationType    string // The authentication type, e.g., "password", "external", "global", "noauth".
 	State                 string // The desired state of the user account, e.g., "locked", "unlocked".
 }
 
@@ -38,6 +38,8 @@ func (c *Client) CreateUser(user User) error {
 		sql += " IDENTIFIED EXTERNALLY"
 	case "global":
 		sql += " IDENTIFIED GLOBALLY"
+	case "noauth":
+		sql += " NO AUTHENTICATION"
 	}
 
 	if user.DefaultTablespace != "" {
